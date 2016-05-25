@@ -86,6 +86,69 @@ func EnqueueWithOptions(queue, class string, args interface{}, opts EnqueueOptio
 	return data.Jid, nil
 }
 
+func PrepareEnqueuMsg(queue, class string, args interface{}) *Msg {
+	now := NowToSecondsWithNanoPrecision()
+	data := EnqueueData{
+		Queue:          queue,
+		Class:          class,
+		Args:           args,
+		Jid:            generateJid(),
+		EnqueuedAt:     now,
+		EnqueueOptions: EnqueueOptions{At: NowToSecondsWithNanoPrecision()},
+	}
+
+	bytes, _ := json.Marshal(data)
+	msg, _ := NewMsg(string(bytes))
+	return msg
+}
+
+func EnqueueMsg(msg *Msg) error {
+	if _, err := msg.Get("queue").String(); err != nil {
+		return fmt.Errorf("Bad queue value: %s", err)
+	}
+
+	now := NowToSecondsWithNanoPrecision()
+
+	if _, err := msg.Get("jid").String(); err != nil {
+		if _, ok := msg.CheckGet("jid"); ok {
+			return fmt.Errorf("Bad JID value: %s", err)
+		}
+
+		msg.Set("jid", generateJid())
+	}
+
+	if _, err := msg.Get("at").Float64(); err != nil {
+		if _, ok := msg.CheckGet("at"); ok {
+			return fmt.Errorf("Bad at value: %s", err)
+		}
+
+		msg.Set("at", now)
+	}
+
+	msg.Set("enqueued_at", now)
+	bytes, _ := msg.Encode()
+	queue, _ := msg.Get("queue").String()
+
+	if at, _ := msg.Get("at").Float64(); now < at {
+		err := enqueueAt(at, bytes)
+		return err
+	}
+
+	conn := Config.Pool.Get()
+	defer conn.Close()
+
+	if _, err := conn.Do("sadd", Config.Namespace+"queues", queue); err != nil {
+		return err
+	}
+
+	queue = Config.Namespace + "queue:" + queue
+	if _, err := conn.Do("rpush", queue, bytes); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func enqueueAt(at float64, bytes []byte) error {
 	conn := Config.Pool.Get()
 	defer conn.Close()

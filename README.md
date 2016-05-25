@@ -5,6 +5,7 @@
 
 Modifications to the vanilla version include:
  - `NowToSecondsWithNanoPrecision()` is exported in the package
+ - `PrepareEnqueuMsg()` and `EnqueueMsg()` are added
 
 [Sidekiq](http://sidekiq.org/) compatible
 background workers in [golang](http://golang.org/).
