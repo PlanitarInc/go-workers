@@ -16,7 +16,7 @@ func ScheduledSpec(c gospec.Context) {
 		conn := Config.Pool.Get()
 		defer conn.Close()
 
-		now := nowToSecondsWithNanoPrecision()
+		now := NowToSecondsWithNanoPrecision()
 
 		message1, _ := NewMsg("{\"queue\":\"default\",\"foo\":\"bar1\"}")
 		message2, _ := NewMsg("{\"queue\":\"myqueue\",\"foo\":\"bar2\"}")

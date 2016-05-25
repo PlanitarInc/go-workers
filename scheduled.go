@@ -36,7 +36,7 @@ func (s *scheduled) quit() {
 func (s *scheduled) poll() {
 	conn := Config.Pool.Get()
 
-	now := nowToSecondsWithNanoPrecision()
+	now := NowToSecondsWithNanoPrecision()
 
 	for _, key := range s.keys {
 		key = Config.Namespace + key
@@ -52,7 +52,7 @@ func (s *scheduled) poll() {
 			if removed, _ := redis.Bool(conn.Do("zrem", key, messages[0])); removed {
 				queue, _ := message.Get("queue").String()
 				queue = strings.TrimPrefix(queue, Config.Namespace)
-				message.Set("enqueued_at", nowToSecondsWithNanoPrecision())
+				message.Set("enqueued_at", NowToSecondsWithNanoPrecision())
 				conn.Do("lpush", Config.Namespace+"queue:"+queue, message.ToJson())
 			}
 		}

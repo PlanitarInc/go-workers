@@ -69,7 +69,7 @@ func EnqueueSpec(c gospec.Context) {
 
 			ea := result["enqueued_at"].(float64)
 			c.Expect(ea, Not(Equals), 0)
-			c.Expect(ea, IsWithin(0.1), nowToSecondsWithNanoPrecision())
+			c.Expect(ea, IsWithin(0.1), NowToSecondsWithNanoPrecision())
 		})
 
 		c.Specify("has retry and retry_count when set", func() {

@@ -38,11 +38,11 @@ func generateJid() string {
 }
 
 func Enqueue(queue, class string, args interface{}) (string, error) {
-	return EnqueueWithOptions(queue, class, args, EnqueueOptions{At: nowToSecondsWithNanoPrecision()})
+	return EnqueueWithOptions(queue, class, args, EnqueueOptions{At: NowToSecondsWithNanoPrecision()})
 }
 
 func EnqueueIn(queue, class string, in float64, args interface{}) (string, error) {
-	return EnqueueWithOptions(queue, class, args, EnqueueOptions{At: nowToSecondsWithNanoPrecision() + in})
+	return EnqueueWithOptions(queue, class, args, EnqueueOptions{At: NowToSecondsWithNanoPrecision() + in})
 }
 
 func EnqueueAt(queue, class string, at time.Time, args interface{}) (string, error) {
@@ -50,7 +50,7 @@ func EnqueueAt(queue, class string, at time.Time, args interface{}) (string, err
 }
 
 func EnqueueWithOptions(queue, class string, args interface{}, opts EnqueueOptions) (string, error) {
-	now := nowToSecondsWithNanoPrecision()
+	now := NowToSecondsWithNanoPrecision()
 	data := EnqueueData{
 		Queue:          queue,
 		Class:          class,
@@ -109,6 +109,6 @@ func durationToSecondsWithNanoPrecision(d time.Duration) float64 {
 	return float64(d.Nanoseconds()) / NanoSecondPrecision
 }
 
-func nowToSecondsWithNanoPrecision() float64 {
+func NowToSecondsWithNanoPrecision() float64 {
 	return timeToSecondsWithNanoPrecision(time.Now())
 }
