@@ -3,7 +3,8 @@
 
 
 
-### #################################################
+### =================================================
+
 
 ### THIS IS PLANITAR's FORK of [jrallison/go-workers](https://github.com/jrallison/go-workers)
 
@@ -11,7 +12,8 @@ Modifications to the vanilla version include:
  - `NowToSecondsWithNanoPrecision()` is exported in the package
  - `PrepareEnqueuMsg()` and `EnqueueMsg()` are added
 
-### #################################################
+
+### =================================================
 
 
 
