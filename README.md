@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/jrallison/go-workers.png)](https://travis-ci.org/jrallison/go-workers)
-[![GoDoc](https://godoc.org/github.com/jrallison/go-workers?status.png)](https://godoc.org/github.com/jrallison/go-workers)
+[![Build Status](https://travis-ci.org/PlanitarInc/go-workers.png)](https://travis-ci.org/PlanitarInc/go-workers)
+[![GoDoc](https://godoc.org/github.com/PlanitarInc/go-workers?status.png)](https://godoc.org/github.com/PlanitarInc/go-workers)
 
 ### THIS IS PLANITAR's FORK of [jrallison/go-workers](https://github.com/jrallison/go-workers)
 
@@ -24,7 +24,7 @@ Example usage:
 package main
 
 import (
-	"github.com/jrallison/go-workers"
+	"github.com/PlanitarInc/go-workers"
 )
 
 func myJob(message *workers.Msg) {
