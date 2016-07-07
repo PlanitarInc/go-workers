@@ -120,38 +120,79 @@ func EnqueueSpec(c gospec.Context) {
 	})
 
 	c.Specify("PrepareEnqueuMsg", func() {
-		msg := PrepareEnqueuMsg("ququ-queue", "QuquClass", map[string]interface{}{"foo": "bar", "baz": true})
 
-		c.Specify("has set queue, class and args fields", func() {
-			queue, err := msg.Get("queue").String()
-			c.Expect(err, Equals, nil)
-			c.Expect(queue, Equals, "ququ-queue")
+		c.Specify("empty options", func() {
+			val := map[string]interface{}{"foo": "bar", "baz": true}
+			opts := EnqueueOptions{}
+			msg := PrepareEnqueuMsg("ququ-queue", "QuquClass", val, opts)
 
-			class, err := msg.Get("class").String()
-			c.Expect(err, Equals, nil)
-			c.Expect(class, Equals, "QuquClass")
+			c.Specify("has set queue, class and args fields", func() {
+				queue, err := msg.Get("queue").String()
+				c.Expect(err, Equals, nil)
+				c.Expect(queue, Equals, "ququ-queue")
 
-			args, err := msg.Get("args").Map()
-			c.Expect(err, Equals, nil)
-			c.Expect(len(args), Equals, 2)
-			c.Expect(args["foo"], Equals, "bar")
-			c.Expect(args["baz"], Equals, true)
+				class, err := msg.Get("class").String()
+				c.Expect(err, Equals, nil)
+				c.Expect(class, Equals, "QuquClass")
+
+				args, err := msg.Get("args").Map()
+				c.Expect(err, Equals, nil)
+				c.Expect(len(args), Equals, 2)
+				c.Expect(args["foo"], Equals, "bar")
+				c.Expect(args["baz"], Equals, true)
+			})
+
+			c.Specify("has set JID", func() {
+				val, err := msg.Get("jid").String()
+				c.Expect(err, Equals, nil)
+				c.Expect(len(val), Equals, 24)
+			})
+
+			c.Specify("filled the timestamps", func() {
+				at, err := msg.Get("at").Float64()
+				c.Expect(err, Equals, nil)
+				c.Expect(at, IsWithin(0.1), NowToSecondsWithNanoPrecision())
+
+				enqueueAt, err := msg.Get("enqueued_at").Float64()
+				c.Expect(err, Equals, nil)
+				c.Expect(enqueueAt, IsWithin(0.1), NowToSecondsWithNanoPrecision())
+			})
+
+			c.Specify("has default options", func() {
+				_, ok1 := msg.CheckGet("retry")
+				c.Expect(ok1, Equals, false)
+
+				_, ok2 := msg.CheckGet("retry_count")
+				c.Expect(ok2, Equals, false)
+			})
 		})
 
-		c.Specify("has set JID", func() {
-			val, err := msg.Get("jid").String()
-			c.Expect(err, Equals, nil)
-			c.Expect(len(val), Equals, 24)
-		})
+		c.Specify("preserve passed options", func() {
+			val := map[string]interface{}{"foo": "bar", "baz": true}
+			opts := EnqueueOptions{Retry: true, RetryCount: 17, At: NowToSecondsWithNanoPrecision() + 5}
+			msg := PrepareEnqueuMsg("ququ-queue", "QuquClass", val, opts)
 
-		c.Specify("has set timestamps", func() {
-			at, err := msg.Get("at").Float64()
-			c.Expect(err, Equals, nil)
-			c.Expect(at, IsWithin(0.1), NowToSecondsWithNanoPrecision())
+			c.Specify("has retry fields", func() {
+				retry, err := msg.Get("retry").Bool()
+				c.Expect(err, Equals, nil)
+				c.Expect(retry, Equals, true)
 
-			enqueueAt, err := msg.Get("enqueued_at").Float64()
-			c.Expect(err, Equals, nil)
-			c.Expect(enqueueAt, IsWithin(0.1), NowToSecondsWithNanoPrecision())
+				retry_count, err := msg.Get("retry_count").Int()
+				c.Expect(err, Equals, nil)
+				c.Expect(retry_count, Equals, 17)
+			})
+
+			c.Specify("preserved the at timestamp", func() {
+				at, err := msg.Get("at").Float64()
+				c.Expect(err, Equals, nil)
+				c.Expect(at, IsWithin(0.1), NowToSecondsWithNanoPrecision()+5)
+			})
+
+			c.Specify("filled enqueued_at timestamp", func() {
+				enqueueAt, err := msg.Get("enqueued_at").Float64()
+				c.Expect(err, Equals, nil)
+				c.Expect(enqueueAt, IsWithin(0.1), NowToSecondsWithNanoPrecision())
+			})
 		})
 	})
 

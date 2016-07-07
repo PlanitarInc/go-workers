@@ -86,15 +86,20 @@ func EnqueueWithOptions(queue, class string, args interface{}, opts EnqueueOptio
 	return data.Jid, nil
 }
 
-func PrepareEnqueuMsg(queue, class string, args interface{}) *Msg {
+func PrepareEnqueuMsg(queue, class string, args interface{}, opts EnqueueOptions) *Msg {
 	now := NowToSecondsWithNanoPrecision()
+
+	if opts.At <= 0 {
+		opts.At = now
+	}
+
 	data := EnqueueData{
 		Queue:          queue,
 		Class:          class,
 		Args:           args,
 		Jid:            generateJid(),
 		EnqueuedAt:     now,
-		EnqueueOptions: EnqueueOptions{At: NowToSecondsWithNanoPrecision()},
+		EnqueueOptions: opts,
 	}
 
 	bytes, _ := json.Marshal(data)
