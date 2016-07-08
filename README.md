@@ -11,6 +11,7 @@
 Modifications to the vanilla version include:
  - `NowToSecondsWithNanoPrecision()` is exported in the package
  - `PrepareEnqueuMsg()` and `EnqueueMsg()` are added
+ - `MaxAttempts` field was added to `EnqueueOptions` struct
 
 
 ### =================================================

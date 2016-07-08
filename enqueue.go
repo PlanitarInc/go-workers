@@ -22,9 +22,10 @@ type EnqueueData struct {
 }
 
 type EnqueueOptions struct {
-	RetryCount int     `json:"retry_count,omitempty"`
-	Retry      bool    `json:"retry,omitempty"`
-	At         float64 `json:"at,omitempty"`
+	MaxAttempts int     `json:"max_attempts,omitempty"`
+	RetryCount  int     `json:"retry_count,omitempty"`
+	Retry       bool    `json:"retry,omitempty"`
+	At          float64 `json:"at,omitempty"`
 }
 
 func generateJid() string {

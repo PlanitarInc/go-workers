@@ -1,10 +1,11 @@
 package workers
 
 import (
+	"time"
+
 	"github.com/customerio/gospec"
 	. "github.com/customerio/gospec"
 	"github.com/garyburd/redigo/redis"
-	"time"
 )
 
 func MiddlewareRetrySpec(c gospec.Context) {
@@ -77,6 +78,48 @@ func MiddlewareRetrySpec(c gospec.Context) {
 
 		retries, _ := redis.Strings(conn.Do("zrange", "prod:"+RETRY_KEY, 0, 1))
 		c.Expect(retries[0], Equals, message.ToJson())
+	})
+
+	c.Specify("allows setting max attempts", func() {
+		message, _ := NewMsg("{\"jid\":\"2\",\"max_attempts\":3}")
+
+		wares.call("myqueue", message, func() {
+			worker.process(message)
+		})
+
+		conn := Config.Pool.Get()
+		defer conn.Close()
+
+		retries, _ := redis.Strings(conn.Do("zrange", "prod:"+RETRY_KEY, 0, 1))
+		c.Expect(retries[0], Equals, message.ToJson())
+	})
+
+	c.Specify("respects max attempts", func() {
+		message, _ := NewMsg("{\"jid\":\"2\",\"retry_count\":1,\"max_attempts\":2}")
+
+		wares.call("myqueue", message, func() {
+			worker.process(message)
+		})
+
+		conn := Config.Pool.Get()
+		defer conn.Close()
+
+		count, _ := redis.Int(conn.Do("zcard", "prod:"+RETRY_KEY))
+		c.Expect(count, Equals, 0)
+	})
+
+	c.Specify("max attempts overrides numeric retry", func() {
+		message, _ := NewMsg("{\"jid\":\"2\",\"retry_count\":1,\"max_attempts\":2,\"retry\":5}")
+
+		wares.call("myqueue", message, func() {
+			worker.process(message)
+		})
+
+		conn := Config.Pool.Get()
+		defer conn.Close()
+
+		count, _ := redis.Int(conn.Do("zcard", "prod:"+RETRY_KEY))
+		c.Expect(count, Equals, 0)
 	})
 
 	c.Specify("handles new failed message", func() {
