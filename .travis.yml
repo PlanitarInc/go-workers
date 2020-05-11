@@ -5,7 +5,6 @@ go:
   - "tip"
 
 script:
-  - go get github.com/customerio/gospec
   - go test -v
 
 services:
